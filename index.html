@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Ponto Digital Servidor - Sistema de registro de ponto eletrônico para servidores públicos">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <title>Ponto Digital Servidor</title>
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    
+    <!-- ============================================
+         LOGIN VIEW
+         ============================================ -->
+    <div id="login-view" class="view active">
+        <div class="container" style="padding-top: 80px;">
+            <div class="card card-glass">
+                <div class="text-center mb-xl">
+                    <h1 class="app-title" style="font-size: 2.5rem; margin-bottom: 0.5rem;">
+                        ⏱️ Ponto Digital
+                    </h1>
+                    <p class="text-muted mb-0">Sistema de Registro de Ponto</p>
+                </div>
+                
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-matricula" class="form-label">Matrícula</label>
+                        <input 
+                            type="text" 
+                            id="login-matricula" 
+                            class="form-input" 
+                            placeholder="Digite sua matrícula"
+                            required
+                            autofocus
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="login-senha" class="form-label">Senha</label>
+                        <input 
+                            type="password" 
+                            id="login-senha" 
+                            class="form-input" 
+                            placeholder="Digite sua senha"
+                            required
+                        >
+                    </div>
+                    
+                    <div id="login-error" class="feedback-box feedback-error hidden">
+                        <strong>Erro:</strong> <span id="login-error-message"></span>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        Entrar
+                    </button>
+                </form>
+                
+                <div class="text-center mt-lg">
+                    <p class="text-muted" style="font-size: 0.875rem;">
+                        💡 <strong>Usuários de Teste:</strong><br>
+                        Servidor: <code style="background: rgba(99,102,241,0.2); padding: 2px 6px; border-radius: 4px;">1001</code> | 
+                        Admin: <code style="background: rgba(99,102,241,0.2); padding: 2px 6px; border-radius: 4px;">9999</code><br>
+                        Senha: <code style="background: rgba(99,102,241,0.2); padding: 2px 6px; border-radius: 4px;">1234</code>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         DASHBOARD VIEW (Employee Main Screen)
+         ============================================ -->
+    <div id="dashboard-view" class="view">
+        <header class="app-header">
+            <div class="header-content">
+                <h2 class="app-title">Ponto Digital</h2>
+                <div class="user-info">
+                    <span class="user-name" id="header-user-name">—</span>
+                    <small id="header-user-matricula">—</small>
+                </div>
+            </div>
+        </header>
+        
+        <div class="container" style="padding-bottom: 100px;">
+            <div id="dashboard-feedback" class="feedback-box feedback-success hidden">
+                <span id="dashboard-feedback-message"></span>
+            </div>
+            
+            <!-- Main Action Button -->
+            <button 
+                id="ponto-btn" 
+                class="btn btn-hero btn-success"
+                data-next-action="entrada"
+            >
+                <span id="ponto-btn-text">REGISTRAR ENTRADA</span>
+            </button>
+            
+            <!-- Last Record Display -->
+            <div id="last-record-display" class="last-record hidden">
+                <div class="last-record-title">Último Ponto Registrado</div>
+                <div class="last-record-time" id="last-record-time">—</div>
+                <div class="last-record-date" id="last-record-date">—</div>
+                <div class="last-record-type">
+                    <span class="badge" id="last-record-badge">—</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="nav-container">
+                <button class="nav-btn active" data-view="dashboard">
+                    <span class="nav-icon">🏠</span>
+                    <span>Início</span>
+                </button>
+                <button class="nav-btn" data-view="timesheet">
+                    <span class="nav-icon">📋</span>
+                    <span>Espelho</span>
+                </button>
+                <button class="nav-btn" id="admin-nav-btn" data-view="admin" style="display: none;">
+                    <span class="nav-icon">👨‍💼</span>
+                    <span>Admin</span>
+                </button>
+                <button class="nav-btn" id="logout-btn">
+                    <span class="nav-icon">🚪</span>
+                    <span>Sair</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- ============================================
+         TIMESHEET VIEW (Espelho de Ponto)
+         ============================================ -->
+    <div id="timesheet-view" class="view">
+        <header class="app-header">
+            <div class="header-content">
+                <h2 class="app-title">Meu Espelho de Ponto</h2>
+                <div class="user-info">
+                    <span class="user-name" id="timesheet-user-name">—</span>
+                </div>
+            </div>
+        </header>
+        
+        <div class="container" style="padding-bottom: 100px;">
+            <!-- Filters -->
+            <div class="card mb-lg">
+                <h3 style="font-size: 1.25rem; margin-bottom: 1rem;">Filtros</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group mb-0">
+                        <label for="filter-date-start" class="form-label">Data Inicial</label>
+                        <input 
+                            type="date" 
+                            id="filter-date-start" 
+                            class="form-input"
+                        >
+                    </div>
+                    <div class="form-group mb-0">
+                        <label for="filter-date-end" class="form-label">Data Final</label>
+                        <input 
+                            type="date" 
+                            id="filter-date-end" 
+                            class="form-input"
+                        >
+                    </div>
+                </div>
+                <button id="apply-filters-btn" class="btn btn-primary mt-lg" style="width: 100%;">
+                    Aplicar Filtros
+                </button>
+            </div>
+            
+            <!-- Records Table -->
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Hora</th>
+                            <th>Tipo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="timesheet-table-body">
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">
+                                Nenhum registro encontrado
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="nav-container">
+                <button class="nav-btn" data-view="dashboard">
+                    <span class="nav-icon">🏠</span>
+                    <span>Início</span>
+                </button>
+                <button class="nav-btn active" data-view="timesheet">
+                    <span class="nav-icon">📋</span>
+                    <span>Espelho</span>
+                </button>
+                <button class="nav-btn" id="admin-nav-btn-timesheet" data-view="admin" style="display: none;">
+                    <span class="nav-icon">👨‍💼</span>
+                    <span>Admin</span>
+                </button>
+                <button class="nav-btn" id="logout-btn-timesheet">
+                    <span class="nav-icon">🚪</span>
+                    <span>Sair</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- ============================================
+         ADMIN VIEW
+         ============================================ -->
+    <div id="admin-view" class="view">
+        <header class="app-header">
+            <div class="header-content">
+                <h2 class="app-title">Painel Administrativo</h2>
+                <div class="user-info">
+                    <span class="user-name" id="admin-user-name">—</span>
+                </div>
+            </div>
+        </header>
+        
+        <div class="container" style="padding-bottom: 100px;">
+            <!-- Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-total-records">0</span>
+                    <span class="stat-label">Registros</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-total-employees">0</span>
+                    <span class="stat-label">Servidores</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-today-records">0</span>
+                    <span class="stat-label">Hoje</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-month-records">0</span>
+                    <span class="stat-label">Este Mês</span>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="card mb-lg">
+                <h3 style="font-size: 1.25rem; margin-bottom: 1rem;">Filtros e Exportação</h3>
+                
+                <div class="form-group">
+                    <label for="admin-filter-employee" class="form-label">Servidor</label>
+                    <select id="admin-filter-employee" class="form-input">
+                        <option value="">Todos os Servidores</option>
+                    </select>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div class="form-group mb-0">
+                        <label for="admin-date-start" class="form-label">Data Inicial</label>
+                        <input 
+                            type="date" 
+                            id="admin-date-start" 
+                            class="form-input"
+                        >
+                    </div>
+                    <div class="form-group mb-0">
+                        <label for="admin-date-end" class="form-label">Data Final</label>
+                        <input 
+                            type="date" 
+                            id="admin-date-end" 
+                            class="form-input"
+                        >
+                    </div>
+                </div>
+                
+                <button id="admin-apply-filters-btn" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">
+                    Aplicar Filtros
+                </button>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <button id="export-csv-btn" class="btn btn-secondary">
+                        📊 Exportar CSV
+                    </button>
+                    <button id="export-json-btn" class="btn btn-secondary">
+                        📄 Exportar JSON
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Records Table -->
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Matrícula</th>
+                            <th>Nome</th>
+                            <th>Data</th>
+                            <th>Hora</th>
+                            <th>Tipo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-table-body">
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">
+                                Nenhum registro encontrado
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="nav-container">
+                <button class="nav-btn" data-view="dashboard">
+                    <span class="nav-icon">🏠</span>
+                    <span>Início</span>
+                </button>
+                <button class="nav-btn" data-view="timesheet">
+                    <span class="nav-icon">📋</span>
+                    <span>Espelho</span>
+                </button>
+                <button class="nav-btn active" data-view="admin">
+                    <span class="nav-icon">👨‍💼</span>
+                    <span>Admin</span>
+                </button>
+                <button class="nav-btn" id="logout-btn-admin">
+                    <span class="nav-icon">🚪</span>
+                    <span>Sair</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>
